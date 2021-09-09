@@ -10,3 +10,8 @@ This repo will also include some games made with the engine
     - [ ] Circles
     - [ ] Lines
     - [ ] Triangles
+
+
+
+## Things that would be fucking cool, but probably won't implement
+- [ ] 3D

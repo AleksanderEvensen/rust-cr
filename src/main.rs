@@ -1,35 +1,41 @@
+#[allow(non_snake_case)]
 mod Console;
+
+use std::{thread, time::Duration};
+
 use Console::ConsoleRenderer;
 
-use std::time:: { Duration, Instant };
-use std::thread;
+
+
 
 fn main() {
 
-    let mut console = ConsoleRenderer::new("Hello World - Game", 80,25, 1,1);
+    let mut console = ConsoleRenderer::new("Hello World - Game", 100,40);
     let is_running = true;
 
-    let mut x = 0;
+    let mut x = 0.0;
 
 
     while is_running {
         console.clear();
 
-        console.draw(x, 9, 'X', 0x00f0);
 
-        x+=1;
+        x+=0.001;
 
-        console.fill(1,1,5,5,'#', 0x00f0);
+        let (x,y) = get_point_from_angle(x, 10.0);
+
+        console.draw(50+x.round() as i16, 20+y.round() as i16, '*', 0x00f0);
+
+        // console.fill(0,0,5,25,'#', 0x00f0 | 0x0001);
 
         console.blit();
         
-        thread::sleep(Duration::from_millis(200));
+        // thread::sleep(Duration::from_millis(1));
     }
-    
-    
-    // console.draw(10,10,'#', 0x00F0);
+}
 
-    // console.blit();
-
-    // thread::sleep(std::time::Duration::from_secs(5));
+fn get_point_from_angle(angle:f32, radius:f32) -> (f32, f32) {
+    let x = (angle * radius).sin() * radius;
+    let y = (angle * radius).cos() * radius;
+    (x,y)
 }

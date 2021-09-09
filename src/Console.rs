@@ -72,7 +72,7 @@ pub struct ConsoleRenderer {
 
 
 impl ConsoleRenderer {
-    pub fn new(title: &str, width:i16, height:i16, font_width:i16, font_height:i16) -> ConsoleRenderer {
+    pub fn new(title: &str, width:i16, height:i16) -> ConsoleRenderer {
         let console_output_handle = unsafe { GetStdHandle(STD_OUTPUT_HANDLE) };
 
         if console_output_handle == INVALID_HANDLE_VALUE {
@@ -124,7 +124,7 @@ impl ConsoleRenderer {
         if width <= 0 && height <= 0 {return};
         
         let end = COORD { X: (x+width), Y: (y+height) };
-        if x > 0 && end.X < self.screen_size.X && y > 0 && end.Y < self.screen_size.Y {
+        if x >= 0 && end.X <= self.screen_size.X && y >= 0 && end.Y <= self.screen_size.Y {
             
             for i in 0..height {
                 for j in 0..width {
