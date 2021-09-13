@@ -8,7 +8,7 @@ This repo will also include some games made with the engine
 - [x] Input System
 - [ ] Shape-Rendering
     - [ ] Circles
-    - [ ] Lines
+    - [x] Lines
     - [ ] Triangles
 
 

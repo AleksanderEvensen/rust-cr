@@ -43,8 +43,11 @@ fn main() {
             text_y += 20.0*delta_time;
         }
 
+        console.draw_triangle((4,6), (20,5), (text_x.round() as i16,text_y.round() as i16), ' ', 0x00f0, false);
 
+        // console.draw_line((4,4), (text_x.round() as i16,text_y.round() as i16), '#', 0x00f0);
         console.draw(text_x.round() as i16,text_y.round() as i16, ' ', 0x00f0);
+
 
 
 

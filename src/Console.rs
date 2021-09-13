@@ -187,6 +187,44 @@ impl ConsoleRenderer {
         }
     }
 
+
+    /*
+        Bresenham's line algorithm
+        Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+    */
+    pub fn draw_line(&mut self, point_a: (i16,i16), point_b: (i16,i16), text: char, color: u16) {
+        let dx =  (point_b.0-point_a.0).abs();
+        let sx = if point_a.0<point_b.0 { 1 } else { -1 };
+        let dy = -(point_b.1-point_a.1).abs();
+        let sy = if point_a.1<point_b.1 { 1 } else { -1 };
+        let mut err = dx+dy;
+
+        let mut x = point_a.0;
+        let mut y = point_a.1;
+
+        loop {
+            self.draw(x, y, text, color);
+            if x == point_b.0 && y == point_b.1 { break };
+            let e2 = 2*err;
+            if e2 >= dy {
+                err += dy;
+                x += sx;
+            }
+            if e2 <= dx {
+                err += dx;
+                y += sy;
+            }
+        }
+    }
+
+
+    pub fn draw_triangle(&mut self, point_a:(i16, i16), point_b: (i16,i16), point_c:(i16,i16), text:char, color:u16,  fill:bool) {
+        self.draw_line(point_a, point_b, text, color);
+        self.draw_line(point_b, point_c, text, color);
+        self.draw_line(point_c, point_a, text, color);
+    }
+
+
     pub fn clear(&mut self) {
         self.text_buffer.iter_mut().for_each(|x| *x = CHAR_INFO::empty());
     }
