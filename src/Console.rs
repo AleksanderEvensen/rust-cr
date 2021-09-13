@@ -1,34 +1,37 @@
-use winapi::um::{
-    processenv::GetStdHandle,
-    wincon::{
-        SetConsoleTitleW,
-        WriteConsoleOutputW,
-        SetConsoleWindowInfo,
-        SetConsoleScreenBufferSize,
-        SetConsoleActiveScreenBuffer,
-        SetCurrentConsoleFontEx,
-        CONSOLE_FONT_INFOEX,
-    },
-    wincontypes::{
-        CHAR_INFO, CHAR_INFO_Char,
-        COORD,
-        SMALL_RECT,
-    },
-    winnt::{
-        SHORT,
-        HANDLE,
-        WCHAR,
-    },
-
-    handleapi::INVALID_HANDLE_VALUE,
-    winbase::{ STD_OUTPUT_HANDLE },
+use winapi::{
+    shared::minwindef::{BOOL},
+    um::{
+        handleapi::INVALID_HANDLE_VALUE,
+        processenv::GetStdHandle,
+        winbase::{ STD_OUTPUT_HANDLE },
+        wincon::{
+            CONSOLE_FONT_INFOEX,
+            SetConsoleActiveScreenBuffer,
+            SetConsoleScreenBufferSize,
+            SetConsoleTitleW,
+            SetConsoleWindowInfo,
+            SetCurrentConsoleFontEx,
+            WriteConsoleOutputW,
+        },
+        wincontypes::{
+            CHAR_INFO, CHAR_INFO_Char,
+            COORD,
+            SMALL_RECT,
+        },
+        winnt::{
+            SHORT,
+            HANDLE,
+            WCHAR,
+        }
+    }
 };
+
 
 
 use winapi::ctypes::c_int;
 use widestring::U16CString;
 
-use std::convert::TryInto;
+use std::{convert::TryInto};
 use std::mem::zeroed;
 
 trait Empty {
@@ -67,6 +70,7 @@ impl FromChar for CHAR_INFO_Char {
     }
 }
 
+
 impl Empty for COORD {
     fn empty() -> COORD {
         COORD {
@@ -94,78 +98,77 @@ impl Empty for CONSOLE_FONT_INFOEX {
 pub struct ConsoleRenderer {
     handle: HANDLE,
     text_buffer: Vec<CHAR_INFO>,
-    screen_size: COORD,
 
+    screen_size: COORD,
     window_rect: SMALL_RECT,
 
+    font: CONSOLE_FONT_INFOEX,
+}
 
-    font_size: COORD,
+
+// Basic initialization and setup functions
+impl ConsoleRenderer {
+    pub fn new() -> ConsoleRenderer {
+        let console_out_handle = unsafe { GetStdHandle(STD_OUTPUT_HANDLE) };
+        if console_out_handle == INVALID_HANDLE_VALUE { panic!("Console Handle was invalid") };
+        ConsoleRenderer {
+            handle: console_out_handle,
+            screen_size: COORD { X:0, Y:0 },
+            text_buffer: vec![CHAR_INFO::empty(); 0],
+            window_rect:SMALL_RECT { Left:0, Top:0, Right:0, Bottom:0 },
+
+            font: CONSOLE_FONT_INFOEX::empty(),
+        }
+    }
+
+    pub fn construct(&mut self, width: u16, height:u16, title: &str) {
+        self.set_window_size(width, height, true);
+        self.set_window_title(title);
+    }
+
+}
+
+
+// Winapi functions with rust translation
+impl ConsoleRenderer {
+    pub fn set_window_size(&mut self, width: u16, height: u16, absolute:bool) {
+        self.window_rect.Bottom = (height-1) as SHORT;
+        self.window_rect.Right = (width-1) as SHORT;
+        self.text_buffer = vec![CHAR_INFO::empty(); (width * height) as usize];
+        self.screen_size.X = width as i16;
+        self.screen_size.Y = height as i16;
+        unsafe {  
+            SetConsoleScreenBufferSize(self.handle, COORD { X: width as i16, Y: height as i16 });
+            SetConsoleActiveScreenBuffer(self.handle);
+            SetConsoleWindowInfo(self.handle, absolute as BOOL, &self.window_rect);
+        };
+    }
+
+    pub fn set_window_title(&self, title: &str) {
+        unsafe { SetConsoleTitleW(U16CString::from_str(title).unwrap().as_ptr()) };
+    }
+
+    pub fn set_font_size(&mut self, font_weight: u32, font_size: (i16,i16)) {
+        self.font.FontWeight = font_weight;
+        self.font.dwFontSize = COORD { X: font_size.0, Y: font_size.1 };
+        self.font.cbSize = std::mem::size_of::<CONSOLE_FONT_INFOEX>() as u32;
+        unsafe { SetCurrentConsoleFontEx(self.handle, 0, &mut self.font); }
+    }  
 }
 
 
 impl ConsoleRenderer {
-    pub fn new(title: &str, width:i16, height:i16, font_width:i16, font_height:i16) -> ConsoleRenderer {
-        let console_output_handle = unsafe { GetStdHandle(STD_OUTPUT_HANDLE) };
-
-        if console_output_handle == INVALID_HANDLE_VALUE {
-            panic!("Console Handle was invalid");
-        }
-
-        let window_rect = SMALL_RECT {
-            Left: 0,
-            Top: 0,
-            Right: width-1,
-            Bottom: height-1,
-        };
-
-
-        let mut font = CONSOLE_FONT_INFOEX::empty();
-
-        font.cbSize = std::mem::size_of::<CONSOLE_FONT_INFOEX>().try_into().unwrap();
-        font.dwFontSize.X = font_width;
-        font.dwFontSize.Y = font_height;
-
-
-        unsafe {
-            SetConsoleWindowInfo(console_output_handle, 1, &window_rect);
-            SetConsoleScreenBufferSize(console_output_handle, COORD { X: width, Y: height });
-            SetConsoleActiveScreenBuffer(console_output_handle);
-            SetConsoleTitleW(U16CString::from_str(title).unwrap().as_ptr());
-        
-            SetCurrentConsoleFontEx(console_output_handle, 0, &mut font);
-        }
-
-
-
-        ConsoleRenderer {
-            handle: console_output_handle,
-            text_buffer:vec!(CHAR_INFO::empty(); (width*height).try_into().unwrap()),
-            screen_size: COORD { X: width, Y: height },
-
-            window_rect: window_rect,
-
-            font_size: COORD { X: font_width, Y: font_height },
-        }
-    }
-
-    pub fn set_title(&self, title: &str) {
-        let title = U16CString::from_str(title).expect("Failed to convert &str to U16CString");
-        unsafe { SetConsoleTitleW(title.as_ptr()) };
-    }
-
     pub fn draw(&mut self, x: i16, y: i16, text: char, color: u16) {
-        if x >= 0 && x <= self.screen_size.X && y >= 0 && y <= self.screen_size.Y {
-            let mut char_info = CHAR_INFO {
+        if x >= 0 && x <= self.screen_size.X-1 && y >= 0 && y <= self.screen_size.Y-1 {
+            self.text_buffer[(y*self.screen_size.X + x) as usize] = CHAR_INFO {
                 Char: CHAR_INFO_Char::from_char(text),
                 Attributes: color,
             };
-            self.text_buffer[(y*self.screen_size.X + x) as usize] = char_info;
         }
     }
 
     pub fn draw_string(&mut self, x: i16, y: i16, text: &str, color: u16) {
         for (i, chr) in text.chars().enumerate() {
-            if x+(i as i16) < 0 || x+(i as i16)+1 > self.screen_size.X as i16 || y < 0 || y > self.screen_size.Y { continue; }
             self.draw(x + i as i16, y, chr, color);
         }
     }
@@ -185,7 +188,7 @@ impl ConsoleRenderer {
     }
 
     pub fn clear(&mut self) {
-        &self.text_buffer.iter_mut().for_each(|x| *x = CHAR_INFO::empty());
+        self.text_buffer.iter_mut().for_each(|x| *x = CHAR_INFO::empty());
     }
 
     pub fn blit(&self) {
