@@ -163,6 +163,13 @@ impl ConsoleRenderer {
         }
     }
 
+    pub fn draw_string(&mut self, x: i16, y: i16, text: &str, color: u16) {
+        for (i, chr) in text.chars().enumerate() {
+            if x+(i as i16) < 0 || x+(i as i16)+1 > self.screen_size.X as i16 || y < 0 || y > self.screen_size.Y { continue; }
+            self.draw(x + i as i16, y, chr, color);
+        }
+    }
+
     pub fn fill(&mut self, x: i16, y: i16, width: i16, height: i16, text: char, color: u16) {
         if width <= 0 && height <= 0 {return};
         

@@ -5,7 +5,7 @@ This repo will also include some games made with the engine
 
 ## Remains to be implemented:
 - [x] Basic Rendering
-- [ ] Input System
+- [x] Input System
 - [ ] Shape-Rendering
     - [ ] Circles
     - [ ] Lines
