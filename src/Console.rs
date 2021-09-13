@@ -21,6 +21,8 @@ use winapi::um::{
     winbase::{ STD_OUTPUT_HANDLE },
 };
 
+
+use winapi::ctypes::c_int;
 use widestring::U16CString;
 
 use std::convert::TryInto;
@@ -142,5 +144,9 @@ impl ConsoleRenderer {
         let mut rect = self.window_rect;
         let rect_ptr = &mut rect;
         unsafe { WriteConsoleOutputW(self.handle, self.text_buffer.as_ptr(), self.screen_size, COORD { X: 0, Y: 0 }, rect_ptr) };
+    }
+
+    pub fn is_key_down(key:c_int) -> bool {
+        unsafe { winapi::um::winuser::GetAsyncKeyState(key) != 0 }
     }
 }
