@@ -5,12 +5,9 @@ mod Console;
 
 use Console::ConsoleRenderer;
 
-
-
-
 fn main() {
 
-    let mut console = ConsoleRenderer::new("Hello World - Game", 100,40);
+    let mut console = ConsoleRenderer::new("Hello World - Game", 100,100, 10,10);
     let is_running = true;
 
     let mut x = 0.0;
@@ -31,7 +28,6 @@ fn main() {
         }
         console.blit();
         
-        // thread::sleep(Duration::from_millis(1));
     }
 }
 

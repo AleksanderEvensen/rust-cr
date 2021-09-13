@@ -6,6 +6,8 @@ use winapi::um::{
         SetConsoleWindowInfo,
         SetConsoleScreenBufferSize,
         SetConsoleActiveScreenBuffer,
+        SetCurrentConsoleFontEx,
+        CONSOLE_FONT_INFOEX,
     },
     wincontypes::{
         CHAR_INFO, CHAR_INFO_Char,
@@ -15,6 +17,7 @@ use winapi::um::{
     winnt::{
         SHORT,
         HANDLE,
+        WCHAR,
     },
 
     handleapi::INVALID_HANDLE_VALUE,
@@ -64,17 +67,44 @@ impl FromChar for CHAR_INFO_Char {
     }
 }
 
+impl Empty for COORD {
+    fn empty() -> COORD {
+        COORD {
+            X:0,
+            Y:0,
+        }
+    }
+}
+
+impl Empty for CONSOLE_FONT_INFOEX {
+    fn empty() -> CONSOLE_FONT_INFOEX {
+        CONSOLE_FONT_INFOEX {
+            cbSize: 0,
+            nFont: 0,
+            dwFontSize: COORD::empty(),
+            FontFamily: 0,
+            FontWeight: 0,
+            FaceName: [0 as WCHAR; 32],
+        }
+    }
+    
+}
+
+
 pub struct ConsoleRenderer {
     handle: HANDLE,
     text_buffer: Vec<CHAR_INFO>,
     screen_size: COORD,
 
     window_rect: SMALL_RECT,
+
+
+    font_size: COORD,
 }
 
 
 impl ConsoleRenderer {
-    pub fn new(title: &str, width:i16, height:i16) -> ConsoleRenderer {
+    pub fn new(title: &str, width:i16, height:i16, font_width:i16, font_height:i16) -> ConsoleRenderer {
         let console_output_handle = unsafe { GetStdHandle(STD_OUTPUT_HANDLE) };
 
         if console_output_handle == INVALID_HANDLE_VALUE {
@@ -89,11 +119,20 @@ impl ConsoleRenderer {
         };
 
 
+        let mut font = CONSOLE_FONT_INFOEX::empty();
+
+        font.cbSize = std::mem::size_of::<CONSOLE_FONT_INFOEX>().try_into().unwrap();
+        font.dwFontSize.X = font_width;
+        font.dwFontSize.Y = font_height;
+
+
         unsafe {
             SetConsoleWindowInfo(console_output_handle, 1, &window_rect);
             SetConsoleScreenBufferSize(console_output_handle, COORD { X: width, Y: height });
             SetConsoleActiveScreenBuffer(console_output_handle);
             SetConsoleTitleW(U16CString::from_str(title).unwrap().as_ptr());
+        
+            SetCurrentConsoleFontEx(console_output_handle, 0, &mut font);
         }
 
 
@@ -104,6 +143,8 @@ impl ConsoleRenderer {
             screen_size: COORD { X: width, Y: height },
 
             window_rect: window_rect,
+
+            font_size: COORD { X: font_width, Y: font_height },
         }
     }
 
