@@ -10,6 +10,7 @@ This repo will also include some games made with the engine
     - [x] Lines
     - [x] Circles
     - [x] Triangles
+    - [x] Polygons
 
 
 

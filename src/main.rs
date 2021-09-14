@@ -61,19 +61,17 @@ fn main() {
             circle_y += 20.0*delta_time * if ConsoleRenderer::is_key_down(winapi::um::winuser::VK_SHIFT) { 4.0 } else { 1.0 };
         }
 
-        let dist = get_dist(circle_x.round() as i16, circle_y.round() as i16, text_x.round() as i16,text_y.round() as i16);
+        let dist = get_dist(circle_x.round() as i32, circle_y.round() as i32, text_x.round() as i32,text_y.round() as i32);
         // console.draw_circle_experimental(circle_x.round() as i16, circle_y.round() as i16, dist.round() as i16, ' ', 0x00f0);
-        console.draw_circle(circle_x.round() as i16, circle_y.round() as i16, dist.round() as i16, ' ', 0x00f0, false);
-        console.draw(text_x.round() as i16,text_y.round() as i16, '#', 0x00f0);
-
-
+        console.draw_circle(circle_x.round() as i32, circle_y.round() as i32, dist.round() as i32, ' ', 0x00f0, false);
+        console.draw(text_x.round() as i32,text_y.round() as i32, '#', 0x00f0);
         console.draw_string(1, 3, format!("Distance: {}", dist).as_str(), 0x00f0);
 
         console.blit();
     }
 }
 
-fn get_dist(x:i16,y:i16,x2:i16,y2:i16) -> f32 {
+fn get_dist(x:i32,y:i32,x2:i32,y2:i32) -> f32 {
     let dx = x2 - x;
     let dy = y2 - y;
     return ((dx*dx + dy*dy) as f32).sqrt();

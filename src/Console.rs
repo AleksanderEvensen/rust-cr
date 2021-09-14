@@ -94,41 +94,44 @@ impl Empty for CONSOLE_FONT_INFOEX {
     
 }
 
+
+type Number = i32;
+
 pub struct Color;
 #[allow(dead_code)]
 impl Color {
-    pub const FG_BLACK:i16	     = 0x0000;
-    pub const FG_DARKBLUE:i16    = 0x0001;	
-    pub const FG_DARKGREEN:i16   = 0x0002;
-    pub const FG_DARKCYAN:i16    = 0x0003;
-    pub const FG_DARKRED:i16     = 0x0004;
-    pub const FG_DARKMAGENTA:i16 = 0x0005;
-    pub const FG_DARKYELLOW:i16  = 0x0006;
-    pub const FG_GREY:i16        = 0x0007;
-    pub const FG_DARKGREY:i16    = 0x0008;
-    pub const FG_BLUE:i16        = 0x0009;
-    pub const FG_GREEN:i16		 = 0x000A;
-    pub const FG_CYAN:i16        = 0x000B;
-    pub const FG_RED:i16         = 0x000C;
-    pub const FG_MAGENTA:i16     = 0x000D;
-    pub const FG_YELLOW:i16      = 0x000E;
-    pub const FG_WHITE:i16		 = 0x000F;
-    pub const BG_BLACK:i16	     = 0x0000;
-    pub const BG_DARKBLUE:i16	 = 0x0010;
-    pub const BG_DARKGREEN:i16	 = 0x0020;
-    pub const BG_DARKCYAN:i16	 = 0x0030;
-    pub const BG_DARKRED:i16     = 0x0040;
-    pub const BG_DARKMAGENTA:i16 = 0x0050;
-    pub const BG_DARKYELLO:i16   = 0x0060;
-    pub const BG_GREY:i16        = 0x0070;
-    pub const BG_DARKGREY:i16	 = 0x0080;
-    pub const BG_BLUE:i16        = 0x0090;
-    pub const BG_GREEN:i16		 = 0x00A0;
-    pub const BG_CYAN:i16        = 0x00B0;
-    pub const BG_RED:i16         = 0x00C0;
-    pub const BG_MAGENTA:i16     = 0x00D0;
-    pub const BG_YELLOW:i16      = 0x00E0;
-    pub const BG_WHITE:i16		 = 0x00F0;
+    pub const FG_BLACK:u16	     = 0x0000;
+    pub const FG_DARKBLUE:u16    = 0x0001;	
+    pub const FG_DARKGREEN:u16   = 0x0002;
+    pub const FG_DARKCYAN:u16    = 0x0003;
+    pub const FG_DARKRED:u16     = 0x0004;
+    pub const FG_DARKMAGENTA:u16 = 0x0005;
+    pub const FG_DARKYELLOW:u16  = 0x0006;
+    pub const FG_GREY:u16        = 0x0007;
+    pub const FG_DARKGREY:u16    = 0x0008;
+    pub const FG_BLUE:u16        = 0x0009;
+    pub const FG_GREEN:u16		 = 0x000A;
+    pub const FG_CYAN:u16        = 0x000B;
+    pub const FG_RED:u16         = 0x000C;
+    pub const FG_MAGENTA:u16     = 0x000D;
+    pub const FG_YELLOW:u16      = 0x000E;
+    pub const FG_WHITE:u16		 = 0x000F;
+    pub const BG_BLACK:u16	     = 0x0000;
+    pub const BG_DARKBLUE:u16	 = 0x0010;
+    pub const BG_DARKGREEN:u16	 = 0x0020;
+    pub const BG_DARKCYAN:u16	 = 0x0030;
+    pub const BG_DARKRED:u16     = 0x0040;
+    pub const BG_DARKMAGENTA:u16 = 0x0050;
+    pub const BG_DARKYELLO:u16   = 0x0060;
+    pub const BG_GREY:u16        = 0x0070;
+    pub const BG_DARKGREY:u16	 = 0x0080;
+    pub const BG_BLUE:u16        = 0x0090;
+    pub const BG_GREEN:u16		 = 0x00A0;
+    pub const BG_CYAN:u16        = 0x00B0;
+    pub const BG_RED:u16         = 0x00C0;
+    pub const BG_MAGENTA:u16     = 0x00D0;
+    pub const BG_YELLOW:u16      = 0x00E0;
+    pub const BG_WHITE:u16		 = 0x00F0;
 }
 
 
@@ -158,7 +161,7 @@ impl ConsoleRenderer {
         }
     }
 
-    pub fn construct(&mut self, width: u16, height:u16, title: &str) {
+    pub fn construct(&mut self, width: Number, height:Number, title: &str) {
         self.set_window_size(width, height, true);
         self.set_window_title(title);
     }
@@ -168,14 +171,14 @@ impl ConsoleRenderer {
 
 // Winapi functions with rust translation
 impl ConsoleRenderer {
-    pub fn set_window_size(&mut self, width: u16, height: u16, absolute:bool) {
+    pub fn set_window_size(&mut self, width: Number, height: Number, absolute:bool) {
         self.window_rect.Bottom = (height-1) as SHORT;
         self.window_rect.Right = (width-1) as SHORT;
         self.text_buffer = vec![CHAR_INFO::empty(); (width * height) as usize];
         self.screen_size.X = width as i16;
         self.screen_size.Y = height as i16;
         unsafe {  
-            SetConsoleScreenBufferSize(self.handle, COORD { X: width as i16, Y: height as i16 });
+            SetConsoleScreenBufferSize(self.handle, self.screen_size);
             SetConsoleActiveScreenBuffer(self.handle);
             SetConsoleWindowInfo(self.handle, absolute as BOOL, &self.window_rect);
         };
@@ -195,25 +198,25 @@ impl ConsoleRenderer {
 
 #[allow(dead_code)]
 impl ConsoleRenderer {
-    pub fn draw(&mut self, x: i16, y: i16, text: char, color: u16) {
-        if x >= 0 && x <= self.screen_size.X-1 && y >= 0 && y <= self.screen_size.Y-1 {
-            self.text_buffer[(y*self.screen_size.X + x) as usize] = CHAR_INFO {
+    pub fn draw(&mut self, x: Number, y: Number, text: char, color: u16) {
+        if x >= 0 && x <= self.screen_size.X as Number - 1 && y >= 0 && y <= self.screen_size.Y as Number-1 {
+            self.text_buffer[(y*self.screen_size.X as Number + x) as usize] = CHAR_INFO {
                 Char: CHAR_INFO_Char::from_char(text),
                 Attributes: color,
             };
         }
     }
 
-    pub fn draw_string(&mut self, x: i16, y: i16, text: &str, color: u16) {
+    pub fn draw_string(&mut self, x: Number, y: Number, text: &str, color: u16) {
         for (i, chr) in text.chars().enumerate() {
-            self.draw(x + i as i16, y, chr, color);
+            self.draw(x + i as Number, y, chr, color);
         }
     }
 
-    pub fn fill(&mut self, x: i16, y: i16, width: i16, height: i16, text: char, color: u16) {
+    pub fn fill(&mut self, x: Number, y: Number, width: Number, height: Number, text: char, color: u16) {
         if width <= 0 && height <= 0 {return};
         
-        let end = COORD { X: (x+width), Y: (y+height) };
+        let end = COORD { X: (x+width) as i16, Y: (y+height) as i16 };
         if x >= 0 && end.X <= self.screen_size.X && y >= 0 && end.Y <= self.screen_size.Y {
             
             for i in 0..height {
@@ -228,7 +231,7 @@ impl ConsoleRenderer {
 
     // Bresenham's line algorithm
     // Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-    pub fn draw_line(&mut self, point_a: (i16,i16), point_b: (i16,i16), text: char, color: u16) {
+    pub fn draw_line(&mut self, point_a: (Number,Number), point_b: (Number,Number), text: char, color: u16) {
         let dx =  (point_b.0-point_a.0).abs();
         let sx = if point_a.0<point_b.0 { 1 } else { -1 };
         let dy = -(point_b.1-point_a.1).abs();
@@ -253,18 +256,27 @@ impl ConsoleRenderer {
         }
     }
 
-    // Triangle rendering in a nutshell
-    // Decided not to do filling of triangles. Cuz shit too fucking hard
-    pub fn draw_triangle(&mut self, point_a:(i16, i16), point_b: (i16,i16), point_c:(i16,i16), text:char, color:u16) {
-        self.draw_line(point_a, point_b, text, color);
-        self.draw_line(point_b, point_c, text, color);
-        self.draw_line(point_c, point_a, text, color);
+    // Polygon rendering in a nutshell
+    // Decided not to do filling of polygons. Cuz shit too fucking hard
+    pub fn draw_polygon(&mut self, points: Vec<(Number,Number)>, text:char, color:u16) {
+        if points.len() == 0 { return };
+        if points.len() == 1 { return self.draw(points[0].0, points[0].1, text, color) };
+
+        for i in 0..points.len() {
+            let point = points[i];
+            if i == points.len()-1 {
+                self.draw_line(point, points[0], text, color);
+                continue;
+            }
+            self.draw_line(point, points[i+1], text, color);
+        }
+
     }
 
 
     // Mid-Point Circle Drawing Algorithm
     // Source: https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
-    pub fn draw_circle(&mut self, x: i16, y: i16, r: i16, text: char, color: u16, fill:bool){
+    pub fn draw_circle(&mut self, x: Number, y: Number, r: Number, text: char, color: u16, fill:bool){
 
         let mut _x = r;
         let mut _y = 0;
