@@ -139,7 +139,7 @@ pub struct ConsoleRenderer {
     handle: HANDLE,
     text_buffer: Vec<CHAR_INFO>,
 
-    screen_size: COORD,
+    pub screen_size: COORD,
     window_rect: SMALL_RECT,
 
     font: CONSOLE_FONT_INFOEX,
