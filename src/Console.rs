@@ -27,73 +27,11 @@ use winapi::{
 };
 
 
-
 use winapi::ctypes::c_int;
 use widestring::U16CString;
 
 use std::{convert::TryInto};
 use std::mem::zeroed;
-
-trait Empty {
-    fn empty() -> Self;
-}
-
-trait FromChar {
-    fn from_char(chr: char) -> Self;
-}
-
-impl Empty for CHAR_INFO {
-    fn empty() -> CHAR_INFO {
-        CHAR_INFO {
-            Char: CHAR_INFO_Char::empty(),
-            Attributes: 0,
-        }
-    }
-}
-
-impl Empty for CHAR_INFO_Char {
-    fn empty() -> CHAR_INFO_Char {
-        unsafe { zeroed::<CHAR_INFO_Char>() }
-    }
-}
-
-impl FromChar for CHAR_INFO_Char {
-    fn from_char(chr: char) -> CHAR_INFO_Char {
-        let chr: SHORT = chr as SHORT;
-
-        let mut inf_char = CHAR_INFO_Char::empty();
-        unsafe {
-            *inf_char.UnicodeChar_mut() = chr.try_into().unwrap();   
-        };
-
-        inf_char
-    }
-}
-
-
-impl Empty for COORD {
-    fn empty() -> COORD {
-        COORD {
-            X:0,
-            Y:0,
-        }
-    }
-}
-
-impl Empty for CONSOLE_FONT_INFOEX {
-    fn empty() -> CONSOLE_FONT_INFOEX {
-        CONSOLE_FONT_INFOEX {
-            cbSize: 0,
-            nFont: 0,
-            dwFontSize: COORD::empty(),
-            FontFamily: 0,
-            FontWeight: 0,
-            FaceName: [0 as WCHAR; 32],
-        }
-    }
-    
-}
-
 
 type Number = i32;
 
@@ -214,20 +152,13 @@ impl ConsoleRenderer {
     }
 
     pub fn fill(&mut self, x: Number, y: Number, width: Number, height: Number, text: char, color: u16) {
-        if width <= 0 && height <= 0 {return};
-        
-        let end = COORD { X: (x+width) as i16, Y: (y+height) as i16 };
-        if x >= 0 && end.X <= self.screen_size.X && y >= 0 && end.Y <= self.screen_size.Y {
-            
-            for i in 0..height {
-                for j in 0..width {
-                    self.draw(x+j,y+i,text,color);
-                }
+        if width <= 0 && height <= 0 { return };
+        for i in 0..height {
+            for j in 0..width {
+                self.draw(x+j,y+i,text,color);
             }
         }
     }
-
-
 
     // Bresenham's line algorithm
     // Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
@@ -343,4 +274,66 @@ impl ConsoleRenderer {
     pub fn is_key_down(key:c_int) -> bool {
         unsafe { winapi::um::winuser::GetAsyncKeyState(key) != 0 }
     }
+}
+
+
+// Impl's that is used for initializing winapi types
+trait Empty {
+    fn empty() -> Self;
+}
+
+trait FromChar {
+    fn from_char(chr: char) -> Self;
+}
+
+impl Empty for CHAR_INFO {
+    fn empty() -> CHAR_INFO {
+        CHAR_INFO {
+            Char: CHAR_INFO_Char::empty(),
+            Attributes: 0,
+        }
+    }
+}
+
+impl Empty for CHAR_INFO_Char {
+    fn empty() -> CHAR_INFO_Char {
+        unsafe { zeroed::<CHAR_INFO_Char>() }
+    }
+}
+
+impl FromChar for CHAR_INFO_Char {
+    fn from_char(chr: char) -> CHAR_INFO_Char {
+        let chr: SHORT = chr as SHORT;
+
+        let mut inf_char = CHAR_INFO_Char::empty();
+        unsafe {
+            *inf_char.UnicodeChar_mut() = chr.try_into().unwrap();   
+        };
+
+        inf_char
+    }
+}
+
+
+impl Empty for COORD {
+    fn empty() -> COORD {
+        COORD {
+            X:0,
+            Y:0,
+        }
+    }
+}
+
+impl Empty for CONSOLE_FONT_INFOEX {
+    fn empty() -> CONSOLE_FONT_INFOEX {
+        CONSOLE_FONT_INFOEX {
+            cbSize: 0,
+            nFont: 0,
+            dwFontSize: COORD::empty(),
+            FontFamily: 0,
+            FontWeight: 0,
+            FaceName: [0 as WCHAR; 32],
+        }
+    }
+    
 }
