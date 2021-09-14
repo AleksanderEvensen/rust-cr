@@ -97,37 +97,38 @@ impl Empty for CONSOLE_FONT_INFOEX {
 pub struct Color;
 #[allow(dead_code)]
 impl Color {
-    pub const BGFGBLACK:i16	  = 0x0000;
-    pub const FGDARKBLUE:i16    = 0x0001;	
-    pub const FGDARKGREEN:i16   = 0x0002;
-    pub const FGDARKCYAN:i16    = 0x0003;
-    pub const FGDARKRED:i16     = 0x0004;
-    pub const FGDARKMAGENTA:i16 = 0x0005;
-    pub const FGDARKYELLOW:i16  = 0x0006;
-    pub const FGGREY:i16        = 0x0007;
-    pub const FGDARKGREY:i16    = 0x0008;
-    pub const FGBLUE:i16        = 0x0009;
-    pub const FGGREEN:i16		  = 0x000A;
-    pub const FGCYAN:i16        = 0x000B;
-    pub const FGRED:i16         = 0x000C;
-    pub const FGMAGENTA:i16     = 0x000D;
-    pub const FGYELLOW:i16      = 0x000E;
-    pub const FGWHITE:i16		  = 0x000F;
-    pub const BGDARKBLUE:i16	  = 0x0010;
-    pub const BGDARKGREEN:i16	  = 0x0020;
-    pub const BGDARKCYAN:i16	  = 0x0030;
-    pub const BGDARKRED:i16     = 0x0040;
-    pub const BGDARKMAGENTA:i16 = 0x0050;
-    pub const BGDARKYELLO:i16   = 0x0060;
-    pub const BGGREY:i16        = 0x0070;
-    pub const BGDARKGREY:i16	  = 0x0080;
-    pub const BGBLUE:i16        = 0x0090;
-    pub const BGGREEN:i16		  = 0x00A0;
-    pub const BGCYAN:i16        = 0x00B0;
-    pub const BGRED:i16         = 0x00C0;
-    pub const BGMAGENTA:i16     = 0x00D0;
-    pub const BGYELLOW:i16      = 0x00E0;
-    pub const BGWHITE:i16		  = 0x00F0;
+    pub const FG_BLACK:i16	     = 0x0000;
+    pub const FG_DARKBLUE:i16    = 0x0001;	
+    pub const FG_DARKGREEN:i16   = 0x0002;
+    pub const FG_DARKCYAN:i16    = 0x0003;
+    pub const FG_DARKRED:i16     = 0x0004;
+    pub const FG_DARKMAGENTA:i16 = 0x0005;
+    pub const FG_DARKYELLOW:i16  = 0x0006;
+    pub const FG_GREY:i16        = 0x0007;
+    pub const FG_DARKGREY:i16    = 0x0008;
+    pub const FG_BLUE:i16        = 0x0009;
+    pub const FG_GREEN:i16		 = 0x000A;
+    pub const FG_CYAN:i16        = 0x000B;
+    pub const FG_RED:i16         = 0x000C;
+    pub const FG_MAGENTA:i16     = 0x000D;
+    pub const FG_YELLOW:i16      = 0x000E;
+    pub const FG_WHITE:i16		 = 0x000F;
+    pub const BG_BLACK:i16	     = 0x0000;
+    pub const BG_DARKBLUE:i16	 = 0x0010;
+    pub const BG_DARKGREEN:i16	 = 0x0020;
+    pub const BG_DARKCYAN:i16	 = 0x0030;
+    pub const BG_DARKRED:i16     = 0x0040;
+    pub const BG_DARKMAGENTA:i16 = 0x0050;
+    pub const BG_DARKYELLO:i16   = 0x0060;
+    pub const BG_GREY:i16        = 0x0070;
+    pub const BG_DARKGREY:i16	 = 0x0080;
+    pub const BG_BLUE:i16        = 0x0090;
+    pub const BG_GREEN:i16		 = 0x00A0;
+    pub const BG_CYAN:i16        = 0x00B0;
+    pub const BG_RED:i16         = 0x00C0;
+    pub const BG_MAGENTA:i16     = 0x00D0;
+    pub const BG_YELLOW:i16      = 0x00E0;
+    pub const BG_WHITE:i16		 = 0x00F0;
 }
 
 
@@ -253,7 +254,7 @@ impl ConsoleRenderer {
     }
 
 
-    pub fn draw_triangle(&mut self, point_a:(i16, i16), point_b: (i16,i16), point_c:(i16,i16), text:char, color:u16,  fill:bool) {
+    pub fn draw_triangle(&mut self, point_a:(i16, i16), point_b: (i16,i16), point_c:(i16,i16), text:char, color:u16, fill:bool) {
         self.draw_line(point_a, point_b, text, color);
         self.draw_line(point_b, point_c, text, color);
         self.draw_line(point_c, point_a, text, color);
