@@ -62,12 +62,12 @@ fn main() {
         }
 
         let dist = get_dist(circle_x.round() as i16, circle_y.round() as i16, text_x.round() as i16,text_y.round() as i16);
-        console.draw_circle(circle_x.round() as i16, circle_y.round() as i16, dist.round() as i16, ' ', 0x00f0);
+        // console.draw_circle_experimental(circle_x.round() as i16, circle_y.round() as i16, dist.round() as i16, ' ', 0x00f0);
+        console.draw_circle(circle_x.round() as i16, circle_y.round() as i16, dist.round() as i16, ' ', 0x00f0, true);
         console.draw(text_x.round() as i16,text_y.round() as i16, '#', 0x00f0);
 
 
         console.draw_string(1, 3, format!("Distance: {}", dist).as_str(), 0x00f0);
-
 
         console.blit();
     }

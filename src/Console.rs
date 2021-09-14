@@ -94,6 +94,42 @@ impl Empty for CONSOLE_FONT_INFOEX {
     
 }
 
+pub struct Color;
+#[allow(dead_code)]
+impl Color {
+    pub const BGFGBLACK:i16	  = 0x0000;
+    pub const FGDARKBLUE:i16    = 0x0001;	
+    pub const FGDARKGREEN:i16   = 0x0002;
+    pub const FGDARKCYAN:i16    = 0x0003;
+    pub const FGDARKRED:i16     = 0x0004;
+    pub const FGDARKMAGENTA:i16 = 0x0005;
+    pub const FGDARKYELLOW:i16  = 0x0006;
+    pub const FGGREY:i16        = 0x0007;
+    pub const FGDARKGREY:i16    = 0x0008;
+    pub const FGBLUE:i16        = 0x0009;
+    pub const FGGREEN:i16		  = 0x000A;
+    pub const FGCYAN:i16        = 0x000B;
+    pub const FGRED:i16         = 0x000C;
+    pub const FGMAGENTA:i16     = 0x000D;
+    pub const FGYELLOW:i16      = 0x000E;
+    pub const FGWHITE:i16		  = 0x000F;
+    pub const BGDARKBLUE:i16	  = 0x0010;
+    pub const BGDARKGREEN:i16	  = 0x0020;
+    pub const BGDARKCYAN:i16	  = 0x0030;
+    pub const BGDARKRED:i16     = 0x0040;
+    pub const BGDARKMAGENTA:i16 = 0x0050;
+    pub const BGDARKYELLO:i16   = 0x0060;
+    pub const BGGREY:i16        = 0x0070;
+    pub const BGDARKGREY:i16	  = 0x0080;
+    pub const BGBLUE:i16        = 0x0090;
+    pub const BGGREEN:i16		  = 0x00A0;
+    pub const BGCYAN:i16        = 0x00B0;
+    pub const BGRED:i16         = 0x00C0;
+    pub const BGMAGENTA:i16     = 0x00D0;
+    pub const BGYELLOW:i16      = 0x00E0;
+    pub const BGWHITE:i16		  = 0x00F0;
+}
+
 
 pub struct ConsoleRenderer {
     handle: HANDLE,
@@ -156,7 +192,7 @@ impl ConsoleRenderer {
     }  
 }
 
-
+#[allow(dead_code)]
 impl ConsoleRenderer {
     pub fn draw(&mut self, x: i16, y: i16, text: char, color: u16) {
         if x >= 0 && x <= self.screen_size.X-1 && y >= 0 && y <= self.screen_size.Y-1 {
@@ -188,10 +224,9 @@ impl ConsoleRenderer {
     }
 
 
-    /*
-        Bresenham's line algorithm
-        Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-    */
+
+    // Bresenham's line algorithm
+    // Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
     pub fn draw_line(&mut self, point_a: (i16,i16), point_b: (i16,i16), text: char, color: u16) {
         let dx =  (point_b.0-point_a.0).abs();
         let sx = if point_a.0<point_b.0 { 1 } else { -1 };
@@ -225,17 +260,21 @@ impl ConsoleRenderer {
     }
 
 
-    pub fn draw_circle(&mut self, x: i16,y: i16,r: i16,text: char,color: u16){
-        // Implementing Mid-Point Circle Drawing Algorithm
+    // Mid-Point Circle Drawing Algorithm
+    // Source: https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+    pub fn draw_circle(&mut self, x: i16, y: i16, r: i16, text: char, color: u16, fill:bool){
 
         let mut _x = r;
         let mut _y = 0;
         if r > 0 {
-            self.draw(_x+x, -_y+y, text, color);
-            self.draw(_y+x, _x+y, text, color);
-            self.draw(-_y+x, _x+y, text, color);
-            self.draw(x-r, y, text, color);
-            self.draw(x,y-r, text, color);
+            if fill {
+                self.draw_line((-_y+x, _x+y), (x,y-r), text, color);
+            } else {
+                self.draw(_x+x, -_y+y, text, color);
+                self.draw(-_y+x, _x+y, text, color);
+                self.draw(x-r, y, text, color);
+                self.draw(x,y-r, text, color);
+            }
         }
         let mut P = 1 - r;   
         while _x > _y {
@@ -253,16 +292,26 @@ impl ConsoleRenderer {
             }
 
             
-            self.draw(_x + x,_y + y, text, color);
-            self.draw(-_x + x,_y + y, text, color);
-            self.draw(_x + x,-_y + y, text, color);
-            self.draw(-_x + x,-_y + y, text, color);
+            if fill {
+                self.draw_line((_x + x,_y + y), (_x + x,-_y + y), text, color);
+                self.draw_line((-_x + x,_y + y), (-_x + x,-_y + y), text, color);
+            } else {
+                self.draw(_x + x,_y + y, text, color);
+                self.draw(-_x + x,_y + y, text, color);
+                self.draw(_x + x,-_y + y, text, color);
+                self.draw(-_x + x,-_y + y, text, color);
+            }
             
             if _x != _y {
-                self.draw(_y + x, _x + y, text, color);
-                self.draw(-_y + x, _x + y, text, color);
-                self.draw(_y + x, -_x + y, text, color);
-                self.draw(-_y + x, -_x + y, text, color);
+                if fill {
+                    self.draw_line((_y + x, _x + y), (_y + x, -_x + y), text, color);
+                    self.draw_line((-_y + x, _x + y), (-_y + x, -_x + y), text, color);
+                } else {
+                    self.draw(_y + x, _x + y, text, color);
+                    self.draw(-_y + x, _x + y, text, color);
+                    self.draw(_y + x, -_x + y, text, color);
+                    self.draw(-_y + x, -_x + y, text, color);
+                }
             }
         }
     }
