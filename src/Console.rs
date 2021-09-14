@@ -253,8 +253,9 @@ impl ConsoleRenderer {
         }
     }
 
-
-    pub fn draw_triangle(&mut self, point_a:(i16, i16), point_b: (i16,i16), point_c:(i16,i16), text:char, color:u16, fill:bool) {
+    // Triangle rendering in a nutshell
+    // Decided not to do filling of triangles. Cuz shit too fucking hard
+    pub fn draw_triangle(&mut self, point_a:(i16, i16), point_b: (i16,i16), point_c:(i16,i16), text:char, color:u16) {
         self.draw_line(point_a, point_b, text, color);
         self.draw_line(point_b, point_c, text, color);
         self.draw_line(point_c, point_a, text, color);

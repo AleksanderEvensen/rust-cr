@@ -6,10 +6,10 @@ This repo will also include some games made with the engine
 ## Remains to be implemented:
 - [x] Basic Rendering
 - [x] Input System
-- [ ] Shape-Rendering
+- [x] Shape-Rendering
     - [x] Lines
     - [x] Circles
-    - [ ] Triangles
+    - [x] Triangles
 
 
 
