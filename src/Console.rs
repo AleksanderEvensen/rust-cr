@@ -225,6 +225,48 @@ impl ConsoleRenderer {
     }
 
 
+    pub fn draw_circle(&mut self, x: i16,y: i16,r: i16,text: char,color: u16){
+        // Implementing Mid-Point Circle Drawing Algorithm
+
+        let mut _x = r;
+        let mut _y = 0;
+        if r > 0 {
+            self.draw(_x+x, -_y+y, text, color);
+            self.draw(_y+x, _x+y, text, color);
+            self.draw(-_y+x, _x+y, text, color);
+            self.draw(x-r, y, text, color);
+            self.draw(x,y-r, text, color);
+        }
+        let mut P = 1 - r;   
+        while _x > _y {
+            _y += 1;
+            
+            if P <= 0 {
+                P = P + 2*_y + 1;
+            } else {
+                _x -= 1;
+                P = P + 2*_y - 2*_x + 1;
+            }
+            
+            if _x < _y {
+                break;
+            }
+
+            
+            self.draw(_x + x,_y + y, text, color);
+            self.draw(-_x + x,_y + y, text, color);
+            self.draw(_x + x,-_y + y, text, color);
+            self.draw(-_x + x,-_y + y, text, color);
+            
+            if _x != _y {
+                self.draw(_y + x, _x + y, text, color);
+                self.draw(-_y + x, _x + y, text, color);
+                self.draw(_y + x, -_x + y, text, color);
+                self.draw(-_y + x, -_x + y, text, color);
+            }
+        }
+    }
+
     pub fn clear(&mut self) {
         self.text_buffer.iter_mut().for_each(|x| *x = CHAR_INFO::empty());
     }
